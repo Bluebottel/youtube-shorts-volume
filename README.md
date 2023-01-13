@@ -9,3 +9,6 @@ Tampermonkey script which adds a volume slider to the Youtube shorts interface
 ### Preview
 
 ![Preview of volume slider](preview.png "1.0 preview")
+
+### Notes
+The styling shown in the preview is Firefox only for the moment. Chrome will get a mostly default look due to CSS inconsistensies. All functionality is identical.
