@@ -54,37 +54,52 @@ async function main() {
   // triggers whenever a new video is switched to
   videoObserver.observe(state.video, { attributes: true })
 
-  const actionsBars = state.innerContainer.querySelectorAll('#actions')
+  // add sliders to all loaded videos until they're no longer removed
+  // due to elements loading in
+  await waitUntilSuccess(() => {
+    const actionsBars = state.innerContainer.querySelectorAll('#actions')
 
-  // add volume sliders to all currently loaded videos
-  for (let actionsBar of actionsBars) {
-    const { slider, wrappedSlider } = createRangeSlider(state.rawVolume, onChangeVolume)
-    state.sliders.push({ element: actionsBar, slider })
-    actionsBar.prepend(wrappedSlider)
-  }
-
-  // more videos get loaded after scrolling
-  const innerMutation = new MutationObserver(() => {
-    const allActionBars = state.innerContainer.querySelectorAll('#actions')
-    allActionBars.forEach(actionsBar => {
-      // already added
-      if (state.sliders.some(({ element }) => element === actionsBar)) return
-
+    // add volume sliders to all currently loaded videos
+    for (let actionsBar of actionsBars) {
       const { slider, wrappedSlider } = createRangeSlider(state.rawVolume, onChangeVolume)
       state.sliders.push({ element: actionsBar, slider })
       actionsBar.prepend(wrappedSlider)
+    }
+
+    return state.sliders.length !== 0
+  })
+
+  // more videos get loaded after scrolling
+  const innerMutation = new MutationObserver(async () => {
+    await waitUntilSuccess(() => {
+      const previousNumSliders = state.sliders.length
+      const allActionBars = state.innerContainer.querySelectorAll('#actions')
+
+      allActionBars.forEach(actionsBar => {
+        // already added
+        if (state.sliders.some(({ element }) => element === actionsBar)) {
+          return
+        }
+
+        const { slider, wrappedSlider } = createRangeSlider(state.rawVolume, onChangeVolume)
+        state.sliders.push({ element: actionsBar, slider })
+        actionsBar.prepend(wrappedSlider)
+      })
+
+      return state.sliders.length !== previousNumSliders
     })
   })
-  innerMutation.observe(state.innerContainer, { childList: true })
 
+  innerMutation.observe(state.innerContainer, { childList: true })
 }
+
 
 // library
 async function waitUntilSuccess(func, timeout = 5000, delayBetweenAttempts = 100) {
   const start = new Date().getTime()
   let elapsedTime = 0, result = false, timeLeft = timeout
 
-  while(result !== true && timeLeft > 0) {
+  while (result !== true && timeLeft > 0) {
     elapsedTime = new Date().getTime() - start
     timeLeft = timeout - elapsedTime
     result = await promiseSetTimeout(func, delayBetweenAttempts)
@@ -178,7 +193,7 @@ function createRangeSlider(defaultValue, onInputFunc) {
   slider.min = '0.0'
   slider.step = '0.01'
   slider.value = defaultValue
-  
+
   slider.oninput = onInputFunc
   slider.setAttribute('orient', 'vertical')
   slider.style.height = '100px'
