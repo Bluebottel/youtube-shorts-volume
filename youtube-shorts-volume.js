@@ -2,7 +2,7 @@
 // @name         Youtube shorts volume control
 // @version      1.0
 // @grant        GM_addStyle
-// @match        *www.youtube.com*
+// @match        *www.youtube.com/*
 // @match        *www.youtube.com/shorts*
 // ==/UserScript==
 
