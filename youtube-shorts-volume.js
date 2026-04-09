@@ -183,6 +183,7 @@ function createRangeSliderContainer() {
   div.style.width = '50%'
   div.style.display = 'flex'
   div.style.justifyContent = 'center'
+  div.style.marginBottom = '10px'
   return div
 }
 
